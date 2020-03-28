@@ -6,6 +6,8 @@ using namespace std;
 #define ARROW_FLAG_MAP_KEYS_SORTED 4
 
 extern "C" {
+
+// The copy-pasted structs from the docs
 struct ArrowSchema {
   // Array type description
   const char* format;
@@ -39,11 +41,13 @@ struct ArrowArray {
   void* private_data;
 };
 
+// Release functions to be called by consumers once the work is done. Don't mind for now
 static void release_int32_type(struct ArrowSchema* schema) {
    // Mark released
    schema->release = NULL;
 }
 
+// The Schema of the int32_t "Arrow Array"
 void export_int32_type(struct ArrowSchema* schema) {
    *schema = (struct ArrowSchema) {
       // Type description
@@ -59,6 +63,7 @@ void export_int32_type(struct ArrowSchema* schema) {
    };
 }
 
+// Release functions to be called by consumers once the work is done. Don't mind for now
 static void release_int32_array(struct ArrowArray* array) {
    assert(array->n_buffers == 2);
    // Free the buffers and the buffers array
@@ -68,6 +73,7 @@ static void release_int32_array(struct ArrowArray* array) {
    array->release = NULL;
 }
 
+// The actual definition of the int32_t Arrow Array
 void export_int32_array(const int32_t* data, int64_t nitems,
                         struct ArrowArray* array) {
    // Initialize primitive fields
