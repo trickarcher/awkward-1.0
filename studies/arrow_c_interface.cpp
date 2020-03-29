@@ -42,13 +42,13 @@ struct ArrowArray {
 };
 
 // Release functions to be called by consumers once the work is done. Don't mind for now
-static void release_int32_type(struct ArrowSchema* schema) {
+static void release_int64_type(struct ArrowSchema* schema) {
    // Mark released
    schema->release = NULL;
 }
 
 // The Schema of the int32_t "Arrow Array"
-void export_int32_type(struct ArrowSchema* schema) {
+void export_int64_type(struct ArrowSchema* schema) {
    *schema = (struct ArrowSchema) {
       // Type description
       .format = "l",
@@ -59,12 +59,12 @@ void export_int32_type(struct ArrowSchema* schema) {
       .children = NULL,
       .dictionary = NULL,
       // Bookkeeping
-      .release = &release_int32_type
+      .release = &release_int64_type
    };
 }
 
 // Release functions to be called by consumers once the work is done. Don't mind for now
-static void release_int32_array(struct ArrowArray* array) {
+static void release_int64_array(struct ArrowArray* array) {
    assert(array->n_buffers == 2);
    // Free the buffers and the buffers array
    free((void *) array->buffers[1]);
@@ -74,7 +74,7 @@ static void release_int32_array(struct ArrowArray* array) {
 }
 
 // The actual definition of the int32_t Arrow Array
-void export_int32_array(const int32_t* data, int64_t nitems,
+void export_int64_array(const int32_t* data, int64_t nitems,
                         struct ArrowArray* array) {
    // Initialize primitive fields
    *array = (struct ArrowArray) {
@@ -88,18 +88,13 @@ void export_int32_array(const int32_t* data, int64_t nitems,
       .children = NULL,
       .dictionary = NULL,
       // Bookkeeping
-      .release = &release_int32_array
+      .release = &release_int64_array
    };
    // Allocate list of buffers
    array->buffers = (const void**) malloc(sizeof(void*) * array->n_buffers);
    assert(array->buffers != NULL);
    array->buffers[0] = NULL;  // no nulls, null bitmap can be omitted
    array->buffers[1] = data;
-}
-
-ArrowArray view_contents(struct ArrowArray* arr)
-{
-   return *arr;
 }
 
 }

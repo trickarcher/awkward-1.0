@@ -45,24 +45,30 @@ ArrowArray._fields_ =[("length", c_longlong),
 lib = cdll.LoadLibrary('./libfoo.so')
 
 # Initialize a pyarrow Array!
-arr = pa.array([1, 2, 3, 4])
+batch = pa.RecordBatch.from_arrays([pa.array([0, 1, 2, 3, 4, 5])], ["one"])
+sink = pa.BufferOutputStream()
 
-# This doesn't work!
-# print(np.frombuffer(arr , dtype=np.uint8))
+writer = pa.RecordBatchStreamWriter(sink, batch.schema)
+
+writer.write_batch(batch)
+writer.close()
+buf = sink.getvalue()
+print(np.frombuffer(buf, dtype=np.uint8)[272:].tostring())
+
 
 # Create a int32_t array
-int32_arr = c_int * 4
-arr_ptr = int32_arr(1, 2, 3, 4)
+int64_arr = c_longlong * 6
+arr_ptr = int64_arr(0, 1, 2, 3, 4, 5)
 
 scheme = ArrowSchema()
-lib.export_int32_type(pointer(scheme))
+lib.export_int64_type(pointer(scheme))
 
 # Initialize a ArrowArray struct
 arrow_arr = ArrowArray()
 
 # Call the C++ library function to convert the int32_t array into a ArrowArray
-lib.export_int32_array(arr_ptr, 10, pointer(arrow_arr))
+lib.export_int64_array(arr_ptr, 10, pointer(arrow_arr))
 
 # The bytes get printed! So the above operation was a success. 
 # You can validate by accessing members of struct
-print(np.frombuffer(arrow_arr, dtype=np.uint8))
+print(np.frombuffer(arrow_arr, dtype=np.uint8).tostring())
